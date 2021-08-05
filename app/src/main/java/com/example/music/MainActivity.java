@@ -9,13 +9,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -24,11 +21,8 @@ import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.single.PermissionListener;
 
-import org.w3c.dom.Text;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     ListView listView;
@@ -38,15 +32,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Objects.requireNonNull(getSupportActionBar()).setTitle("All Songs");
 
         listView = findViewById(R.id.listViewSong);
 
-        runtimePermission();
 
+        runtimePermission();
     }
 
-    public void runtimePermission() {
+    public void runtimePermission(){
         Dexter.withContext(this).withPermission(Manifest.permission.READ_EXTERNAL_STORAGE).withListener(new PermissionListener() {
             @Override
             public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
@@ -65,8 +58,7 @@ public class MainActivity extends AppCompatActivity {
         }).check();
     }
 
-
-    public ArrayList<File> findSong(File file) {
+    public ArrayList<File> findSong(File file){
         ArrayList<File> arrayList = new ArrayList<>();
         File[] files = file.listFiles();
         if (files != null) {
@@ -83,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         return arrayList;
     }
 
-    void displaySongs() {
+    void displaySongs(){
         final ArrayList<File> mySongs = findSong(Environment.getExternalStorageDirectory());
 
         items = new String[mySongs.size()];
@@ -91,35 +83,34 @@ public class MainActivity extends AppCompatActivity {
             items[i] = mySongs.get(i).getName().replace(".mp3", "");
 
         }
-//        ArrayAdapter<String> myAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
-//        listView.setAdapter(myAdapter);
+        ArrayAdapter<String> myAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
+        listView.setAdapter(myAdapter);
         customAdapter customAdapter = new customAdapter();
         listView.setAdapter(customAdapter);
 
         listView.setOnItemClickListener((adapterView, view, i, l) -> {
             String songName = (String) listView.getItemAtPosition(i);
-            startActivity(new Intent(getApplicationContext(), Player.class)
+            startActivity(new Intent(getApplicationContext(), mp3player.class)
                     .putExtra("songs", mySongs)
                     .putExtra("songname", songName)
                     .putExtra("pos", i));
         });
+
     }
 
     class customAdapter extends BaseAdapter
     {
 
         @Override
-        public int getCount() {
-            return items.length;
-        }
+        public int getCount() {return items.length;}
 
         @Override
-        public Object getItem(int i) {
+        public Object getItem(int position) {
             return null;
         }
 
         @Override
-        public long getItemId(int i) {
+        public long getItemId(int position) {
             return 0;
         }
 
@@ -129,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
             TextView textsong = myView.findViewById(R.id.txtsongname);
             textsong.setSelected(true);
             textsong.setText(items[i]);
-
             return myView;
         }
     }
+
 }

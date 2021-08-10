@@ -2,7 +2,6 @@ package com.example.music;
 
 
 import android.content.Intent;
-import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -21,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class mp3player extends AppCompatActivity {
-    Button btnplay, btnnext, btnprevious;
-    TextView txtplayer, txtseekbarstart, txtseekbarend;
+    Button btnPlay, btnNext, btnPrevious;
+    TextView txtplayer, txtSeekBarStart, txtseekbarend;
     SeekBar seekBar;
 
     String sname;
@@ -40,11 +39,11 @@ public class mp3player extends AppCompatActivity {
 
         Objects.requireNonNull(getSupportActionBar()).setTitle("Music Player");
 
-        btnprevious = findViewById(R.id.btnprevious);
-        btnplay = findViewById(R.id.btnplay);
-        btnnext = findViewById(R.id.btnnext);
+        btnPrevious = findViewById(R.id.btnprevious);
+        btnPlay = findViewById(R.id.btnplay);
+        btnNext = findViewById(R.id.btnnext);
         txtplayer = findViewById(R.id.txtplayer);
-        txtseekbarstart = findViewById(R.id.txtseekbarstart);
+        txtSeekBarStart = findViewById(R.id.txtseekbarstart);
         txtseekbarend = findViewById(R.id.txtseekbarend);
         seekBar = findViewById(R.id.seekbar);
 
@@ -69,36 +68,11 @@ public class mp3player extends AppCompatActivity {
         sname = mySongs.get(position).getName();
         txtplayer.setText(sname);
 
-        mediaPlayer = MediaPlayer.create(getApplicationContext(),uri);
-        mediaPlayer.start();
-
-        updateseekbar = new Thread()
-        {
-            @Override
-            public void run(){
-
-                int currentposition = 0;
-                    while (currentposition < mediaPlayer.getDuration())
-                    {
-                        try {
-                            currentposition = mediaPlayer.getCurrentPosition();
-                            seekBar.setProgress(currentposition);
-                            sleep(500);
-                        }
-                        catch (InterruptedException | IllegalStateException e)
-                        {
-                            e.printStackTrace();
-                        }
-                    }
-            }
-        };
-        seekBar.setMax(mediaPlayer.getDuration());
-        updateseekbar.start();
-
+        playSong();
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
             }
 
@@ -113,69 +87,35 @@ public class mp3player extends AppCompatActivity {
             }
         });
 
-        String endTime =  createTime(mediaPlayer.getDuration());
-        txtseekbarend.setText(endTime);
-
-        final Handler handler = new Handler();
-        final int delay = 1000;
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if(mediaPlayer.isPlaying()){
-                    String currentTime = createTime(mediaPlayer.getCurrentPosition());
-                    txtseekbarstart.setText(currentTime);
-                    handler.postDelayed(this, delay);
-                }else {
-                    handler.removeCallbacks(this);
-                }
-            }
-        },delay);
-
+        updateTime();
 
         try {
-            btnplay.setOnClickListener(v -> {
+            btnPlay.setOnClickListener(v -> {
                 if (mediaPlayer.isPlaying()) {
-                    btnplay.setBackgroundResource(R.drawable.play_foreground);
+                    btnPlay.setBackgroundResource(R.drawable.play_foreground);
                     mediaPlayer.pause();
                 } else {
-                    btnplay.setBackgroundResource(R.drawable.pause_foreground);
+                    btnPlay.setBackgroundResource(R.drawable.pause_foreground);
                     mediaPlayer.start();
                 }
             });
         }catch (Exception ignored){
 
         }
-        //on complete -_-
+        //on complete
 
-        mediaPlayer.setOnCompletionListener(mp -> btnnext.performClick());
+        mediaPlayer.setOnCompletionListener(mp -> btnNext.performClick());
 
-        btnnext.setOnClickListener(view -> {
-            mediaPlayer.stop();
-            mediaPlayer.release();
+        btnNext.setOnClickListener(view -> {
+            playSong();
             position = ((position+1)%mySongs.size());
-            Uri u = Uri.parse(mySongs.get(position).toString());
-            mediaPlayer = MediaPlayer.create(getApplicationContext(), u);
-            sname = mySongs.get(position).getName();
-            txtplayer.setText(sname);
-            txtseekbarstart.setText(createTime(mediaPlayer.getCurrentPosition()));
-            txtseekbarend.setText(createTime(mediaPlayer.getDuration()));
-            mediaPlayer.start();
-            btnplay.setBackgroundResource(R.drawable.pause_foreground);
+            btnPlay.setBackgroundResource(R.drawable.pause_foreground);
         });
 
-        btnprevious.setOnClickListener(view -> {
-            mediaPlayer.stop();
-            mediaPlayer.release();
+        btnPrevious.setOnClickListener(view -> {
+            playSong();
             position = ((position-1)<0)?(mySongs.size()-1):(position-1);
-            Uri u = Uri.parse(mySongs.get(position).toString());
-            mediaPlayer = MediaPlayer.create(getApplicationContext(), u);
-            sname = mySongs.get(position).getName();
-            txtseekbarstart.setText(createTime(mediaPlayer.getCurrentPosition()));
-            txtseekbarend.setText(createTime(mediaPlayer.getDuration()));
-            txtplayer.setText(sname);
-            mediaPlayer.start();
-            btnplay.setBackgroundResource(R.drawable.pause_foreground);
+            btnPlay.setBackgroundResource(R.drawable.pause_foreground);
         });
     }
 
@@ -194,5 +134,77 @@ public class mp3player extends AppCompatActivity {
         time+=sec;
 
         return time;
+    }
+
+    private void playSong(){
+        try {
+            if(mediaPlayer != null && mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+        }catch (Exception ignored)
+        {
+
+        }
+        Uri u = Uri.parse(mySongs.get(position).toString());
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), u);
+        sname = mySongs.get(position).getName();
+        txtplayer.setText(sname);
+        mediaPlayer.start();
+        try {
+            if (updateseekbar.isAlive())
+                updateseekbar.interrupt();
+        }
+        catch (Exception ignored){
+
+        }
+        manageSeekbar();
+        seekBar.setMax(mediaPlayer.getDuration());
+    }
+
+    private void manageSeekbar(){
+        updateseekbar = new Thread()
+        {
+            @Override
+            public void run(){
+
+                int currentposition = 0;
+                try {
+                    while (currentposition < mediaPlayer.getDuration()) {
+                        currentposition = mediaPlayer.getCurrentPosition();
+                        seekBar.setProgress(currentposition);
+                        sleep(500);
+                    }
+                }catch (Exception e){
+
+                }
+            }
+        };
+        updateseekbar.start();
+    }
+
+    private void updateTime(){
+        String endTime =  createTime(mediaPlayer.getDuration());
+        txtseekbarend.setText(endTime);
+
+        final Handler handler = new Handler();
+        final int delay = 1000;
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (mediaPlayer.isPlaying()) {
+                        String currentTime = createTime(mediaPlayer.getCurrentPosition());
+                        txtSeekBarStart.setText(currentTime);
+                        handler.postDelayed(this, delay);
+                    } else {
+                        handler.removeCallbacks(this);
+                    }
+                }catch (IllegalStateException e){
+                    e.printStackTrace();
+                }
+            }
+        },delay);
     }
 }

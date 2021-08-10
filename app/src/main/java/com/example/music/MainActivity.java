@@ -5,14 +5,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
@@ -27,14 +30,13 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     ListView listView;
     String[] items;
-
+    ArrayList<File> mySongs;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         listView = findViewById(R.id.listViewSong);
-
 
         runtimePermission();
     }
@@ -76,30 +78,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void displaySongs(){
-        final ArrayList<File> mySongs = findSong(Environment.getExternalStorageDirectory());
+        mySongs = findSong(Environment.getExternalStorageDirectory());
 
         items = new String[mySongs.size()];
         for (int i = 0; i < mySongs.size(); i++) {
             items[i] = mySongs.get(i).getName().replace(".mp3", "");
 
         }
-        ArrayAdapter<String> myAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
-        listView.setAdapter(myAdapter);
+
         customAdapter customAdapter = new customAdapter();
         listView.setAdapter(customAdapter);
-
-        listView.setOnItemClickListener((adapterView, view, i, l) -> {
-            String songName = (String) listView.getItemAtPosition(i);
-            startActivity(new Intent(getApplicationContext(), mp3player.class)
-                    .putExtra("songs", mySongs)
-                    .putExtra("songname", songName)
-                    .putExtra("pos", i));
-        });
 
     }
 
     class customAdapter extends BaseAdapter
     {
+
 
         @Override
         public int getCount() {return items.length;}
@@ -117,11 +111,23 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
             @SuppressLint({"ViewHolder", "InflateParams"}) View myView = getLayoutInflater().inflate(R.layout.list_item, null);
-            TextView textsong = myView.findViewById(R.id.txtsongname);
-            textsong.setSelected(true);
-            textsong.setText(items[i]);
+            TextView textSong = myView.findViewById(R.id.txtsongname);
+            textSong.setSelected(true);
+            textSong.setText(items[i]);
+            textSong.setOnClickListener(v -> playSong(i));
+
+//            ToggleButton toggleButton;
             return myView;
+
         }
+    }
+
+    private void playSong(int i){
+        String songName = (String) listView.getItemAtPosition(i);
+        startActivity(new Intent(getApplicationContext(), mp3player.class)
+                .putExtra("songs", mySongs)
+                .putExtra("songname", songName)
+                .putExtra("pos", i));
     }
 
 }

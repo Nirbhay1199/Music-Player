@@ -49,7 +49,7 @@
             android:background="@drawable/check"
             android:checked="false"
             android:textOff=""
-            android:textOn=""/>
+            android:textOn="" />
 
     </RelativeLayout>
 

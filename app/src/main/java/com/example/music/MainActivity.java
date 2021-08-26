@@ -10,13 +10,17 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.example.music.data.DB_Handler;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
@@ -27,16 +31,35 @@ import com.karumi.dexter.listener.single.PermissionListener;
 import java.io.File;
 import java.util.ArrayList;
 
+
 public class MainActivity extends AppCompatActivity {
     ListView listView;
     String[] items;
-    ArrayList<File> mySongs;
+    public static ArrayList<File> mySongs;
+    private Button button;
+    public static CustomAdapter ca;
+    public static ArrayList<String> favSongList = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         listView = findViewById(R.id.listViewSong);
+
+        button = findViewById(R.id.favouriteBtn);
+        button.setOnClickListener(v -> {
+            if (favSongList.isEmpty()){
+                Toast t = Toast.makeText(getApplicationContext(),
+                        "Nothing added to favourite !!!",
+                        Toast.LENGTH_LONG);
+                t.show();
+            }
+            else
+            {
+                favSongBtn();
+            }
+        });
 
         runtimePermission();
     }
@@ -46,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
                 displaySongs();
+                DB_Handler db_handler = new DB_Handler(getApplicationContext());
+                favSongList = (ArrayList<String>) db_handler.getAll_fav_song();
             }
 
             @Override
@@ -58,7 +83,9 @@ public class MainActivity extends AppCompatActivity {
                 permissionToken.continuePermissionRequest();
             }
         }).check();
+
     }
+
 
     public ArrayList<File> findSong(File file){
         ArrayList<File> arrayList = new ArrayList<>();
@@ -86,15 +113,13 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        customAdapter customAdapter = new customAdapter();
-        listView.setAdapter(customAdapter);
+        ca = new CustomAdapter();
+        listView.setAdapter(ca);
 
     }
 
-    class customAdapter extends BaseAdapter
+    class CustomAdapter extends BaseAdapter
     {
-
-
         @Override
         public int getCount() {return items.length;}
 
@@ -116,7 +141,28 @@ public class MainActivity extends AppCompatActivity {
             textSong.setText(items[i]);
             textSong.setOnClickListener(v -> playSong(i));
 
-//            ToggleButton toggleButton;
+            ImageView imageView = myView.findViewById(R.id.imgsong);
+            imageView.setSelected(true);
+            imageView.setOnClickListener(v -> playSong(i));
+
+
+            ToggleButton toggleButton = myView.findViewById(R.id.favourite);
+            if (favSongList.contains(Integer.toString(mySongs.get(i).hashCode()))){
+                toggleButton.setChecked(true);
+            }
+            toggleButton.setOnClickListener(v -> {
+                if (toggleButton.isChecked()){
+                    DB_Handler db = new DB_Handler(MainActivity.this);
+                    db.addFavSong(mySongs.get(i).hashCode());
+                    favSongList.add(Integer.toString(mySongs.get(i).hashCode()));
+                }
+                else {
+                    DB_Handler db = new DB_Handler(MainActivity.this);
+                    if (db.removeSong(mySongs.get(i).hashCode())){
+                        favSongList.remove(Integer.toString(mySongs.get(i).hashCode()));
+                    }
+                }
+            });
             return myView;
 
         }
@@ -128,6 +174,11 @@ public class MainActivity extends AppCompatActivity {
                 .putExtra("songs", mySongs)
                 .putExtra("songname", songName)
                 .putExtra("pos", i));
+    }
+
+    private void favSongBtn(){
+        Intent intent = new Intent(this, fav_song.class);
+        startActivity(intent.putExtra("mySong",mySongs));
     }
 
 }

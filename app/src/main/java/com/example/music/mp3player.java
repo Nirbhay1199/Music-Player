@@ -6,7 +6,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.widget.Button;
 //import android.widget.Filter;
 import android.widget.SeekBar;
@@ -21,17 +20,17 @@ import java.util.Objects;
 
 public class mp3player extends AppCompatActivity {
     Button btnPlay, btnNext, btnPrevious;
-    TextView txtplayer, txtSeekBarStart, txtseekbarend;
+    TextView txtPlayer, txtSeekBarStart, txtSeekBarEnd;
     SeekBar seekBar;
 
-    String sname;
+    String sName;
 
     static MediaPlayer mediaPlayer;
     int position;
     ArrayList<File> mySongs;
-    Thread updateseekbar;
+    Thread updateSeekbar;
 
-    @RequiresApi(api = Build.VERSION_CODES.P)
+//    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,9 +41,9 @@ public class mp3player extends AppCompatActivity {
         btnPrevious = findViewById(R.id.btnprevious);
         btnPlay = findViewById(R.id.btnplay);
         btnNext = findViewById(R.id.btnnext);
-        txtplayer = findViewById(R.id.txtplayer);
+        txtPlayer = findViewById(R.id.txtplayer);
         txtSeekBarStart = findViewById(R.id.txtseekbarstart);
-        txtseekbarend = findViewById(R.id.txtseekbarend);
+        txtSeekBarEnd = findViewById(R.id.txtseekbarend);
         seekBar = findViewById(R.id.seekbar);
 
         try {
@@ -63,17 +62,17 @@ public class mp3player extends AppCompatActivity {
         mySongs = (ArrayList) bundle.getParcelableArrayList("songs");
         String songName = i.getStringExtra("song_Name");
         position = bundle.getInt("pos", 0);
-        txtplayer.setSelected(true);
+        txtPlayer.setSelected(true);
         Uri uri = Uri.parse(mySongs.get(position).toString());
-        sname = mySongs.get(position).getName();
-        txtplayer.setText(sname);
+        sName = mySongs.get(position).getName();
+        txtPlayer.setText(sName);
 
-        playSong();
+        playSong(position);
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
+                txtSeekBarStart.setText(createTime(seekBar.getProgress()));
             }
 
             @Override
@@ -86,8 +85,6 @@ public class mp3player extends AppCompatActivity {
                 mediaPlayer.seekTo(seekBar.getProgress());
             }
         });
-
-        updateTime();
 
         try {
             btnPlay.setOnClickListener(v -> {
@@ -107,14 +104,13 @@ public class mp3player extends AppCompatActivity {
         mediaPlayer.setOnCompletionListener(mp -> btnNext.performClick());
 
         btnNext.setOnClickListener(view -> {
-            playSong();
-            position = ((position+1)%mySongs.size());
+            nextBtn();
             btnPlay.setBackgroundResource(R.drawable.pause_foreground);
         });
 
         btnPrevious.setOnClickListener(view -> {
-            playSong();
-            position = ((position-1)<0)?(mySongs.size()-1):(position-1);
+            previousBtn();
+            playSong(position);
             btnPlay.setBackgroundResource(R.drawable.pause_foreground);
         });
     }
@@ -136,7 +132,7 @@ public class mp3player extends AppCompatActivity {
         return time;
     }
 
-    private void playSong(){
+    private void playSong(int position){
         try {
             if(mediaPlayer != null && mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
@@ -148,63 +144,51 @@ public class mp3player extends AppCompatActivity {
         }
         Uri u = Uri.parse(mySongs.get(position).toString());
         mediaPlayer = MediaPlayer.create(getApplicationContext(), u);
-        sname = mySongs.get(position).getName();
-        txtplayer.setText(sname);
+        sName = mySongs.get(position).getName();
+        txtPlayer.setText(sName);
         mediaPlayer.start();
         try {
-            if (updateseekbar.isAlive())
-                updateseekbar.interrupt();
+            if (updateSeekbar.isAlive())
+                updateSeekbar.interrupt();
         }
         catch (Exception ignored){
 
         }
         manageSeekbar();
+        txtSeekBarEnd.setText(createTime(mediaPlayer.getDuration()));
         seekBar.setMax(mediaPlayer.getDuration());
+        mediaPlayer.setOnCompletionListener(mp -> nextBtn());
     }
 
+
     private void manageSeekbar(){
-        updateseekbar = new Thread()
+        updateSeekbar = new Thread()
         {
             @Override
             public void run(){
-
-                int currentposition = 0;
+                int currentPosition = 0;
                 try {
-                    while (currentposition < mediaPlayer.getDuration()) {
-                        currentposition = mediaPlayer.getCurrentPosition();
-                        seekBar.setProgress(currentposition);
-                        sleep(500);
+                    while (currentPosition < mediaPlayer.getDuration()) {
+                        currentPosition = mediaPlayer.getCurrentPosition();
+                        seekBar.setProgress(currentPosition);
+                        sleep(1000);
                     }
                 }catch (Exception e){
-
-                }
-            }
-        };
-        updateseekbar.start();
-    }
-
-    private void updateTime(){
-        String endTime =  createTime(mediaPlayer.getDuration());
-        txtseekbarend.setText(endTime);
-
-        final Handler handler = new Handler();
-        final int delay = 1000;
-
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (mediaPlayer.isPlaying()) {
-                        String currentTime = createTime(mediaPlayer.getCurrentPosition());
-                        txtSeekBarStart.setText(currentTime);
-                        handler.postDelayed(this, delay);
-                    } else {
-                        handler.removeCallbacks(this);
-                    }
-                }catch (IllegalStateException e){
                     e.printStackTrace();
                 }
             }
-        },delay);
+        };
+        updateSeekbar.start();
     }
+
+    private void nextBtn(){
+        position = ((position+1)%mySongs.size());
+        playSong(position);
+    }
+
+    private void previousBtn(){
+        position = ((position-1)<0)?(mySongs.size()-1):(position-1);
+
+    }
+
 }

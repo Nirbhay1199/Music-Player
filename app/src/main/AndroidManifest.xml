@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".mp3player"/>
+        <activity android:name=".fav_song"/>
     </application>
 
 </manifest>

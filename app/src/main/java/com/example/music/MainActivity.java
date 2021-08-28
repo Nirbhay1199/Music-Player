@@ -1,6 +1,7 @@
 package com.example.music;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     public static CustomAdapter ca;
     public static ArrayList<String> favSongList = new ArrayList<>();
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         listView = findViewById(R.id.listViewSong);
 
         button = findViewById(R.id.favouriteBtn);
+        button.setText("Favourite");
         button.setOnClickListener(v -> {
             if (favSongList.isEmpty()){
                 Toast t = Toast.makeText(getApplicationContext(),

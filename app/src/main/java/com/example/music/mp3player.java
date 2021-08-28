@@ -2,6 +2,8 @@ package com.example.music;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -13,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,6 +34,7 @@ public class mp3player extends AppCompatActivity {
     Thread updateSeekbar;
 
 //    @RequiresApi(api = Build.VERSION_CODES.P)
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +59,7 @@ public class mp3player extends AppCompatActivity {
         }catch (Exception ignored){
 
         }
+
 
         Intent i = getIntent();
         Bundle bundle = i.getExtras();
@@ -113,6 +118,7 @@ public class mp3player extends AppCompatActivity {
             playSong(position);
             btnPlay.setBackgroundResource(R.drawable.pause_foreground);
         });
+
     }
 
 
@@ -155,10 +161,16 @@ public class mp3player extends AppCompatActivity {
 
         }
         manageSeekbar();
+
         txtSeekBarEnd.setText(createTime(mediaPlayer.getDuration()));
         seekBar.setMax(mediaPlayer.getDuration());
+
+        seekBar.getProgressDrawable().setColorFilter(getResources().getColor(R.color.purple_500), PorterDuff.Mode.MULTIPLY);
+        seekBar.getThumb().setColorFilter(getResources().getColor(R.color.purple_700), PorterDuff.Mode.SRC_IN);
+
         mediaPlayer.setOnCompletionListener(mp -> nextBtn());
     }
+
 
 
     private void manageSeekbar(){

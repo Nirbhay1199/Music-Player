@@ -31,9 +31,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="0dp"
-            android:layout_marginEnd="15dp"
-            android:backgroundTint="@color/black"
-            android:text="Favourites" />
+            android:layout_marginEnd="15dp"/>
     </RelativeLayout>
 
 </RelativeLayout>

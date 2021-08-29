@@ -15,13 +15,10 @@ public class start extends AppCompatActivity {
         setContentView(R.layout.start);
 
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(new Intent(start.this,MainActivity.class));
-                finish();
+        handler.postDelayed(() -> {
+            startActivity(new Intent(start.this,MainActivity.class));
+            finish();
 
-            }
-        },500);
+        },200);
     }
 }

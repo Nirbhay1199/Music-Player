@@ -7,6 +7,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
@@ -37,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     ListView listView;
     String[] items;
     public static ArrayList<File> mySongs;
-    private Button button;
     public static CustomAdapter ca;
     public static ArrayList<String> favSongList = new ArrayList<>();
 
@@ -49,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.listViewSong);
 
-        button = findViewById(R.id.favouriteBtn);
-        button.setText("Favourite");
+        ImageView button = findViewById(R.id.favouriteBtn);
+
         button.setOnClickListener(v -> {
             if (favSongList.isEmpty()){
                 Toast t = Toast.makeText(getApplicationContext(),

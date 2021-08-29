@@ -3,13 +3,20 @@ package com.example.music;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
+import android.media.Image;
+import android.media.MediaMetadata;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.widget.Button;
 //import android.widget.Filter;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -40,7 +47,7 @@ public class mp3player extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        Objects.requireNonNull(getSupportActionBar()).setTitle("Music Player");
+//        Objects.requireNonNull(getSupportActionBar()).setTitle("Music Player");
 
         btnPrevious = findViewById(R.id.btnprevious);
         btnPlay = findViewById(R.id.btnplay);
@@ -73,6 +80,7 @@ public class mp3player extends AppCompatActivity {
         txtPlayer.setText(sName);
 
         playSong(position);
+
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -120,6 +128,7 @@ public class mp3player extends AppCompatActivity {
         });
 
     }
+
 
 
     public String createTime(int duration)

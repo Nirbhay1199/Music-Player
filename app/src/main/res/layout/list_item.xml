@@ -31,8 +31,6 @@
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:layout_toEndOf="@+id/imgsong"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever"
             android:padding="6dp"
             android:scrollHorizontally="true"
             android:singleLine="true"

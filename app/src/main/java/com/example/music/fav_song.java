@@ -38,7 +38,7 @@ public class fav_song extends AppCompatActivity {
         super.onCreate(bundle);
         setContentView(R.layout.activity_fav_song);
 
-        Objects.requireNonNull(getSupportActionBar()).setTitle("Favourites");
+//        Objects.requireNonNull(getSupportActionBar()).setTitle("Favourites");
         listView = findViewById(R.id.favSongList);
 
         Intent intent = getIntent();

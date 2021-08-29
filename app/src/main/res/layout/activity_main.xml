@@ -7,12 +7,14 @@
     android:layout_height="match_parent"
     android:background="#000"
     tools:context=".MainActivity">
+    <include layout="@layout/actionbar"/>
 
     <ListView
         android:id="@+id/listViewSong"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/linearLayout"
+        android:layout_marginTop="10dp"
         android:divider="@android:color/transparent"
         android:dividerHeight="10.0sp"
         android:padding="8dp">
@@ -24,14 +26,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <Button
+        <ImageView
             android:id="@+id/favouriteBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="0dp"
-            android:layout_marginEnd="15dp"/>
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/gold_foreground"/>
+
+
     </RelativeLayout>
 
 </RelativeLayout>
